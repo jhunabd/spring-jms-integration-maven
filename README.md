@@ -1,0 +1,1 @@
+# spring-jms-integration-maven
