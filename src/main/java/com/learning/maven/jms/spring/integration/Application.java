@@ -1,5 +1,7 @@
 package com.learning.maven.jms.spring.integration;
 
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
@@ -19,15 +21,31 @@ public class Application {
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 		ConfigurableApplicationContext context = SpringApplication.run(Application.class);
-		JmsTemplate jmsTemplate = context.getBean(JmsTemplate.class);
-		jmsTemplate.convertAndSend("test.queue","Hello guys");
+		Sender sender = context.getBean(Sender.class);
+		sender.send("test.queue","ceyhun test");
+//		System.out.println(Arrays.asList(context.getBeanDefinitionNames()));
 	}
 
 	@Bean
 	public JmsListenerContainerFactory warehouseFactory(ConnectionFactory factory, DefaultJmsListenerContainerFactoryConfigurer configurer){
 		DefaultJmsListenerContainerFactory defaultJmsListenerContainerFactory = new DefaultJmsListenerContainerFactory();
+		defaultJmsListenerContainerFactory.setConcurrency("1-1");
 		configurer.configure(defaultJmsListenerContainerFactory,factory);
 		return defaultJmsListenerContainerFactory;
+	}
+
+
+
+	@Bean
+	public ActiveMQConnectionFactory activeMQConnectionFactory(){
+		return new ActiveMQConnectionFactory("admin","admin","tcp://localhost:61616");
+	}
+
+
+
+	@Bean
+	public JmsTemplate jmsTemplate(ConnectionFactory connectionFactory){
+		return new JmsTemplate(connectionFactory);
 	}
 
 }
